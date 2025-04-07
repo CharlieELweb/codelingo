@@ -1,0 +1,406 @@
+@import url('https://fonts.googleapis.com/css2?family=Winky+Sans:ital,wght@0,300..900;1,300..900&display=swap');
+
+
+
+:root {
+    --dark-green: #58a700;
+    --green: #a5ed6e;
+    --light-green: #d7ffb8;
+    --dark-red: #ea2b2b;
+    --red: #f26864;
+    --light-red: #ffdfdf;
+}
+
+html, body {
+    
+    
+    background-color: black;
+    color: white;
+
+    width: 100%;
+    height: 100%;
+    
+    margin: 0;
+    padding: 0;
+}
+
+input[type="radio"] {
+    display: none;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+header .progress-bar {
+
+    position: relative;
+    background-color: gray;
+
+    width: calc(100% - 40px);
+    height: 10px;
+
+    max-width: 900px;
+    
+    border: 1px solid gray;
+    border-radius: 10px;
+}
+
+header .progress-bar::before {
+    position: absolute;
+    content: "";
+    
+    border: 1px solid lightgray;
+    top:-1px;
+    left: -1px;
+    width: calc(var(--value) * 100%);
+    max-width: 900px;
+    height: 10px;
+    border-radius: 10px;
+    background-color: dodgerblue;
+    transition: 1s;
+}
+
+header .progress-bar.correct::before {
+    background-color: var(--green);
+}
+
+header .progress-bar.wrong::before {
+    background-color: var(--red);
+}
+
+header .progress-bar.win::before {
+    background-color: goldenrod;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    max-width: 1000px;
+    gap: 10px;
+    margin: 0 40px;
+    z-index: 1;
+}
+
+section .title {
+    margin: 0;
+    
+    font-family: "Winky Sans", sans-serif;
+    font-size: 35px;
+    font-weight: 500;
+}
+
+section .question {
+    font-family: "Winky Sans", sans-serif;
+    font-size: 25px;
+    font-weight: 300;
+    min-height: 100px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+@keyframes show {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.tab {
+    width: 30px;
+    height: 0;
+}
+
+section .blank {
+    border: 1px solid white;
+    height: 30px;
+    width: fit-content;
+    min-width: 30px;
+    transition: all 0.3s;
+    box-shadow: inset 0 0 0 0 dodgerblue;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    padding: 5px 10px;
+
+    background-size: calc(200% + 4px) 100%;
+    background-position: 100%;
+
+    opacity: 0;
+    transform: scale(0.8);
+    animation: show 600ms 100ms ease-out forwards;
+}
+
+section .blank.hovered {
+    box-shadow: inset 0 0 0 5px dodgerblue;
+}
+@media only screen and (max-width: 700px) {
+    section .option-list:not(.whole):not(.wrap) {
+        display: grid;
+        grid-template-columns: calc(50% - 5px) calc(50% - 5px);
+        column-gap: 10px;
+        row-gap: 0px;
+    }
+}
+@media only screen and (min-width: 700px) {
+    section .option-list:not(.whole):not(.wrap) {
+        display: grid;
+        grid-template-columns:calc(25% - 5px) calc(25% - 5px) calc(25% - 5px) calc(25% - 5px);
+        column-gap: 10px;
+        row-gap: 0;
+    }
+}
+
+section .option-list.whole {
+    display: flex;
+    flex-direction: column;
+}
+
+section .option-list.wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+section .item {
+    cursor: grab;
+}
+
+section .item:active {
+    cursor: grabbing;
+}
+
+section .question-content {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 7px;
+    row-gap: 3px;
+    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 20px;
+
+    opacity: 0;
+    transform: scale(0.8);
+    animation: show 600ms 100ms ease-out forwards;
+}
+
+section .question-content .question-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+section .question-content .question-item code {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+}
+
+section .dragged {
+    cursor: grabbing;
+    background-color: black;
+    transition: 0.01s;
+    transform: translateX(-9999px);
+}
+
+section .option {
+
+    opacity: 0;
+    transform: scale(0.8);
+    animation: show 600ms 100ms ease-out forwards;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+
+    background-size: calc(200% + 4px) 100%;
+    background-position: 100%;
+    
+    border: 1px solid white;
+    border-radius: 20px;
+    margin: 5px 0;
+    /* gap: 10px; */
+
+    box-shadow: inset 0 0 0 0 gray;
+    transition: all 0.3s;
+          
+}
+
+section .option:hover {
+    box-shadow: inset 0 0 0 5px gray;
+}
+
+section .option:has(input[type="radio"]:checked) {
+    box-shadow: inset 0 0 0 3px dodgerblue;
+    border: 1px solid dodgerblue;
+}
+
+section .option.correct, section .blank.correct {
+    background: linear-gradient(90deg,var(--green) 50%,transparent 0);
+    color: black;
+    background-size: calc(200% + 4px) 100%;
+    background-position: 0;
+}
+
+section .option.wrong, section .blank.wrong {
+    background: linear-gradient(90deg,var(--red) 50%,transparent 0);
+    color: white;
+    background-size: calc(200% + 4px) 100%;
+    background-position: 0;
+}
+
+section .option .content {
+    width: 100%;
+    padding: 10px 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+section .option .content .image {
+    width: 100%;
+}
+
+section .option .content .text {
+    margin: 10px;
+}
+
+section .submit {
+    cursor: pointer;
+    background-color: transparent;
+    color: dodgerblue;
+
+    border: 2px solid dodgerblue;
+    border-radius: 20px;
+    
+    width: 100%;
+    height: fit-content;
+
+    
+    font-size: 25px;
+    padding: 10px;
+
+    transition: all 0.3s;
+}
+
+section .submit:disabled {
+    cursor: default;
+    color: gray;
+    border: 2px solid gray;
+}
+
+section .submit:not(:disabled):hover {
+    background-color: dodgerblue;
+    color: white;
+}
+
+
+
+footer {
+    position: sticky;
+    bottom: 0;
+
+    width: 100%;
+    height: 150px;
+
+}
+
+footer .reason {
+    font-family: "Winky Sans", sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+
+    width: calc(100% - 40px);
+    height: 100%;
+    
+    display: flex;
+    /* flex-direction: column; */
+    /* justify-content: center; */
+    align-content: center;
+    flex-wrap: wrap;
+    padding: 0 20px;
+
+    
+}
+
+
+
+footer .reason.show {
+    opacity: 1;
+}
+
+footer .reason.correct {
+    background-color: var(--light-green);
+    color: var(--dark-green);
+}
+
+footer .reason.wrong {
+    background-color: var(--light-red);
+    color: var(--dark-red)
+}
+
+.question-content code, .blank code {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+
+code {
+    border: 1px solid white;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0 5px;
+    font-size: 23px;
+}
+
+.correct code {
+    border: 2px solid var(--dark-green);
+    color: var(--dark-green);
+}
+
+.wrong code {
+    border: 2px solid var(--dark-red);
+    color: var(--dark-red);
+}
+
+.question-content .wrong code {
+    border: none;
+    color: white;
+}
+
+.question-content .correct code {
+    border: none;
+    color: var(--dark-green);
+}

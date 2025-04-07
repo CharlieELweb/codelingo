@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main">
+        <header>
+            <h1 class="name">#0 Introduction</h1>
+            <div id="progress-bar"class="progress-bar" style="--value: 0.02"></div>
+        </header>
+        
+        <section>
+            <p class="title" id="question-title">This is a question with so many words to test whether the layout is right or not ha ha ha...</p>
+    
+            <div class="question" id="question">
+                
+            </div>
+            <button id="submit" onclick="Submit()" class="submit">Submit</button>
+        </section>
+        
+    
+        <footer>
+            <div id="reason" class="reason">
+                <p>You shoud choose the correct answer, because its right.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <div class="audio">
+        <audio id="audio-correct">
+            <source src="correct.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="audio-wrong">
+            <source src="wrong.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="audio-win">
+            <source src="win.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="audio-click">
+            <source src="click.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+    
+    
+    
+    <script>
+        let questionIndex = 0;
+        const database = [
+            {
+                questionTitle: "What is the definition of <b>programming</b>?",
+                questionType: "choice",
+                reason: "Program is a set of instructions in code that control the operations or functions of a computer.",
+                options: [
+                    {text: "<b>Memory</b> of computer.", correct: false},
+                    {text: "<b>Instructions</b> of computer.", correct: true},
+                    {text: "<b>Control Unit</b> of computer.", correct: false},
+                    {text: "<b>Input Devices</b> of computer.", correct: false},
+                ],
+                row: "1",
+            },
+            {
+                questionTitle: "Which programming language is the <b>oldest</b> one?",
+                questionType: "choice",
+                reason: "Assembly Language is the first programming language.",
+                options: [
+                    {image: "L0_1A.png", text: "Javascript", correct: false},
+                    {image: "L0_1B.png", text: "Python", correct: false},
+                    {image: "L0_1C.png", text: "Assembly", correct: true},
+                    {image: "L0_1D.png", text: "C Language", correct: false},
+                ],
+                row: "2",
+            },
+            {
+                questionTitle: "Match the 4 main component of computer.",
+                questionType: "blank",
+                reason: "",
+                questionContent: `
+                    [blank] : Store Datas
+                    [blank] : Execute Instructions
+                    [blank] : Deal with Math and Logic
+                    [blank] : Such as keyboard/screen
+                    `,
+                options: [
+                    {text: "ALU", order: 2},
+                    {text: "Control Unit", order: 1},
+                    {text: "Memory", order: 0},
+                    {text: "I/O Devices", order: 3},
+                    {text: "Clock", order: -1},
+                ],
+                row: "auto",
+            },
+               
+        ];
+        
+        const questionCount = database.length;
+        
+        let selectID = -1;
+        let selectOrder = [];
+        
+        
+        let correctCount = 0;
+
+        const audioCorrect = document.getElementById("audio-correct");
+        const audioWrong = document.getElementById("audio-wrong");
+        const audioWin = document.getElementById("audio-win");
+        const audioClick = document.getElementById("audio-click");
+
+        const title = document.getElementById("question-title");
+        const question = document.getElementById("question");
+        const submit = document.getElementById("submit");
+        const progressBar = document.getElementById("progress-bar");
+        const reason = document.getElementById("reason");
+
+        let submitFunction = "ShowAnswer";
+        let draggingItem = null;
+
+        window.onkeydown = function(e) {
+            switch(e.key) {
+                case "Enter":
+                    if(submit.disabled == false) {
+                        Submit();
+                    }
+                    break;
+                default: 
+                    break;
+            }
+            
+        }
+
+        function SetRow(row) {
+            const optionList = document.querySelector(".option-list");
+            optionList.classList.remove("whole");
+            switch(row) {
+                case "auto":
+                    optionList.classList.add("wrap");
+                    break;
+                case "1":
+                    optionList.classList.add("whole");
+                    break
+                default:
+                    break;
+            }
+        }
+
+        
+        
+        function Submit() {
+            switch(submitFunction) {
+                case "ShowAnswer":
+                    const currentData = database[questionIndex];
+                    switch(currentData.questionType) {
+                        case "choice":
+                            for(var i = 0;i < currentData.options.length;i++) {
+                                const element = document.getElementById(`opt${i}`).parentElement;
+                                console.log(element);
+                                if(currentData.options[i].correct == true) {
+                                    element.classList.add("correct");
+                                } else if(i == selectID) {
+                                    element.classList.add("wrong");
+                                }
+                            }
+                            
+                            if(currentData.options[selectID].correct) {
+                                correctCount++;
+                                reason.classList.add("correct");
+                                reason.innerHTML = "Great!<div class='break'></div>";
+                                progressBar.classList.add("correct");
+                                audioCorrect.play();
+                            } else {
+                                reason.classList.add("wrong");
+                                reason.innerHTML = "Oh no!<div class='break'></div>";
+                                progressBar.classList.add("wrong");
+                                audioWrong.play();
+                                
+                            }
+                            break;
+                        case "blank":
+                            let allCorrect = true;
+
+                            document.querySelectorAll('.blank').forEach((blank) => {
+                                if(!blank.id.includes("item")) { 
+                                    const element = blank.firstChild;
+                                    console.log(element.id);
+                                    if(currentData.options[element.id.slice(4)].order == blank.id.slice(5)) {
+                                        blank.classList.add("correct");
+                                    } else {
+                                        blank.classList.add("wrong");
+                                        allCorrect = false;
+                                    }
+                                }
+                            });
+
+                            if(allCorrect) {
+                                correctCount++;
+                                reason.classList.add("correct");
+                                reason.innerHTML = "Great!<div class='break'></div>";
+                                progressBar.classList.add("correct");
+                                audioCorrect.play();
+                            } else {
+                                reason.classList.add("wrong");
+                                reason.innerHTML = "Oh no!<div class='break'></div>";
+                                progressBar.classList.add("wrong");
+                                audioWrong.play();
+                                
+                            }
+
+                            break; 
+                        default:
+                            break;
+                    }
+
+                    
+
+                    
+                    reason.innerHTML += currentData.reason;
+                    reason.classList.add("show");
+                    questionIndex++;
+                    RenderProgressBar();
+                    if(questionIndex == questionCount) {
+                        submitFunction = "SeeResult";
+                        submit.innerHTML = "Result";
+
+                    } else {
+                        submitFunction = "NextQuestion";
+                        submit.innerHTML = "Continue";
+                    }
+                    
+                    break;
+                case "NextQuestion":
+                    RenderQuestion();
+                    break;
+                case "SeeResult":
+                    
+                    progressBar.classList.add("win");
+                    audioWin.play();
+                    title.innerHTML = "Congratulations!";
+                    question.innerHTML = `You've got ${correctCount} over ${questionCount} questions!`;
+                    reason.innerHTML = "";
+                    reason.classList.remove("show");
+                    submitFunction = "Back";
+                    submit.innerHTML = "Back";
+
+                    break;
+                case "Back":
+                    window.location.href = '../';
+                default:
+                    break;
+            }
+        }
+        function AddElement(parentElement, type, classes = [], innerHTML = "") {
+            const newElement = document.createElement(type);
+            newElement.classList = classes;
+            newElement.innerHTML = innerHTML;
+            parentElement.appendChild(newElement);
+            return newElement;
+        }
+
+        function Select(id) {
+            selectID = id;
+            console.log("Select Option", selectID);
+            submit.disabled = false;
+        }
+        function RenderProgressBar() {
+            progressBar.style.setProperty("--value", Math.max(0.02, questionIndex / questionCount));
+        }
+
+        function SplitContent(content) {
+            
+            let results = [""];
+            let currentIndex = 0;
+            let flagSkip = false;
+            let flagTag = false;
+            let tag = "";
+            function Next(val="") {
+                if(results[currentIndex] != "") {
+                    currentIndex++;
+                }
+                results[currentIndex] = val;
+                
+            }
+            for(let i = 0;i < content.length;i++) {
+                let val = content[i];
+                switch(content[i]) {
+                    case "\n":
+                        Next("\n");
+                        Next();
+                    case " ":
+                        if(!flagSkip) {
+                            Next();
+                        } else {
+                            results[currentIndex] += val;
+                            if(flagTag) tag += val;
+                        }
+                        break;
+                    case "<":
+                        if(!flagSkip) {
+                            flagSkip = true;
+                            Next("<");
+                        } else {
+                            results[currentIndex] += "<";
+                        }
+                        flagTag = true;
+                        
+                        break;
+                    case ">":
+                        results[currentIndex] += ">";
+                        if(tag.slice(0, 1) == '/' || tag.slice(0, 2) == 'br') {
+                            flagSkip = false;
+                            Next();
+                        }
+                        flagTag = false;
+                        tag = "";
+                        break;
+                    default:
+                        results[currentIndex] += val;
+                        if(flagTag) tag += val;
+                        break;
+                }
+            }
+            console.log("Split", content, results);
+            return results;
+        }
+        function RenderQuestion() {
+            
+            console.log(`Rendering Question ${questionIndex}...`)
+            submitFunction = "ShowAnswer";
+            submit.innerHTML = "Check"
+
+            RenderProgressBar();
+            progressBar.classList = ["progress-bar"];
+            reason.classList = ["reason"];
+            
+            selectID = -1;
+            
+            const currentData = database[questionIndex];
+
+            title.innerHTML = currentData.questionTitle;
+            question.innerHTML = "";
+            reason.innerHTML = "";
+            submit.disabled = true;
+
+            let optionList, questionContent;
+            switch(currentData.questionType) {
+                case "choice":
+                    optionList = AddElement(question, "div", ["option-list"]);
+                    for(let i = 0;i < currentData.options.length;i++) {
+                        let option = AddElement(optionList, "div", ["option"], `
+                            <input onchange="Select(${i})" name="option" id="opt${i}" type="radio">
+                            <label class="content" for="opt${i}">
+                                ${currentData.options[i].image!=undefined?`<img class="image" src="${currentData.options[i].image}" alt="pic"></img>`:""}
+                                ${currentData.options[i].text!=undefined?`<p class="text">${currentData.options[i].text}</p>`:""}
+                                
+                            </label>
+                        `);
+                        
+                    }
+                    break;
+                case "blank":
+                    questionContent = AddElement(question, "div", ["question-content"]);
+                    let contents = SplitContent(currentData.questionContent);
+
+                    
+                    contents.forEach(content => {
+                        console.log("content");
+                        if(content == '[blank]') {
+                            AddElement(questionContent, "div", ["blank"]);
+                        } else if(content == "\n") {
+                            AddElement(questionContent, "div", ["break"]);
+                        } else {
+                            content = content.replaceAll("[blank]", `<div class="blank"></div>`);
+                            content = content.replaceAll("[tab]", `<div class="tab"></div>`);
+                            AddElement(questionContent, "div", ["question-item"], content);
+                        }
+                        
+                    });
+                    
+                    
+
+                    optionList = AddElement(question, "div", ["option-list"]);
+                    for(let i = 0;i < currentData.options.length;i++) {
+                        let option = AddElement(optionList, "div", ["blank"], `
+                            <div class="item" id="item${i}" draggable="true">${currentData.options[i].text}</div>
+                        `);
+                    }
+
+                    document.querySelectorAll('.item').forEach((item) => {
+                        item.parentElement.id = `blank-${item.id}`;
+                        item.addEventListener("dragstart", (e) => {
+                            console.log("Drag", item);
+                            draggingItem = item;
+                            item.classList.add("dragged");
+                        });
+                        item.addEventListener("dragend", (e) => {
+                            console.log(item);
+                            draggingItem = null;
+                            item.classList.remove("Drop", "dragged");
+                        });
+                    });
+
+                    let i = 0;
+                    document.querySelectorAll('.blank').forEach((blank) => {
+                        if(!blank.id.includes("item")) { 
+                            selectOrder[i] = '';
+                            console.log(selectOrder);
+                            blank.id=`blank${i++}`;
+                        }
+                        
+
+                        blank.addEventListener("dragover", (e) => {
+                            e.preventDefault();
+                            blank.classList.add("hovered");
+                        });
+
+                        blank.addEventListener("dragleave", (e) => {
+                            blank.classList.remove("hovered");
+                        });
+
+                        blank.addEventListener("drop", (e) => {
+                            
+                            console.log(e);
+                            if(blank.id.includes("item")) {
+                                document.getElementById(`blank-${draggingItem.id}`).appendChild(draggingItem);
+                                for(let i = 0;i < selectOrder.length;i++) {
+                                    if(selectOrder[i] == draggingItem.id.slice(4)) {
+                                        selectOrder[i] = "";
+                                        submit.disabled = true;
+                                    }
+                                };
+                                console.log(selectOrder);
+
+                            } else {
+                                if(blank.firstChild != null) {
+                                    let id = blank.firstChild.id;
+                                    document.getElementById(`blank-${blank.firstChild.id}`).appendChild(blank.firstChild);
+                                    for(let i = 0;i < selectOrder.length;i++) {
+                                        if(selectOrder[i] == id.slice(4)) {
+                                            selectOrder[i] = "";
+                                            submit.disabled = true;
+                                        }
+                                    };
+                                }
+                                console.log(draggingItem);
+                                blank.appendChild(draggingItem);
+                                selectOrder[blank.id.slice(5)] = draggingItem.id.slice(4);
+                                let full = true;
+                                selectOrder.forEach(element => {
+                                    if(element == "") {
+                                        full = false;
+                                    }
+                                });
+                                if(full) {
+                                    submit.disabled = false;
+                                } else {
+                                    submit.disabled = true;
+                                }
+                                console.log(selectOrder);
+                            }
+                            
+                            
+                            blank.classList.remove("hovered");
+                        });
+                    });
+                    
+                    
+                    
+                default:
+                    break;
+            }
+            SetRow(currentData.row);
+
+
+
+                        
+        }
+
+        RenderQuestion();
+    </script>
+</body>
+</html>
